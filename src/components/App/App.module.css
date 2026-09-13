@@ -1,0 +1,14 @@
+.content {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding-block: var(--space-8);
+  padding-inline: var(--page-padding);
+}
+
+.resultsHeading {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 600;
+  color: var(--color-text);
+}

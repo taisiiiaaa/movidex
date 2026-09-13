@@ -1,21 +1,39 @@
+import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
-import type { ModalState, MovieDetails } from "../../types/movie"
+import { fetchMovieDetails } from "../../services/movieService"
+import type { Movie, MovieDetails, ModalState } from "../../types/types"
 import styles from "./MovieModal.module.css"
 import Loader from "../Loader/Loader"
-import { useEffect } from "react"
 
 interface MovieModalProps {
-  movie: MovieDetails | null
+  movie: Movie
   onClose: () => void
-  modalState: ModalState
 }
 
-export default function MovieModal({
-  movie,
-  onClose,
-  modalState,
-}: MovieModalProps) {
+export default function MovieModal({ movie, onClose }: MovieModalProps) {
   const modalRoot = document.getElementById("modal-root")
+
+  const [movieDetails, setMovieDetails] = useState<MovieDetails | null>(null)
+
+  const [modalState, setModalState] = useState<ModalState>("loading")
+
+  useEffect(() => {
+    const loadMovieDetails = async () => {
+      try {
+        setModalState("loading")
+
+        const details = await fetchMovieDetails(movie.id)
+
+        setMovieDetails(details)
+        setModalState("ready")
+      } catch (error) {
+        console.error(error)
+        setModalState("error")
+      }
+    }
+
+    loadMovieDetails()
+  }, [movie.id])
 
   useEffect(() => {
     const originalOverflow = document.body.style.overflow
@@ -75,14 +93,14 @@ export default function MovieModal({
             </div>
           )}
 
-          {modalState === "ready" && movie && (
+          {modalState === "ready" && movieDetails && (
             <>
               <div className={styles.artwork}>
-                {movie.backdrop_path ? (
+                {movieDetails.backdrop_path ? (
                   <img
                     className={styles.poster}
-                    src={`https://image.tmdb.org/t/p/original/${movie.backdrop_path}`}
-                    alt={`${movie.original_title} poster`}
+                    src={`https://image.tmdb.org/t/p/original/${movieDetails.backdrop_path}`}
+                    alt={`${movieDetails.original_title} poster`}
                     draggable={false}
                   />
                 ) : (
@@ -91,7 +109,7 @@ export default function MovieModal({
               </div>
 
               <div className={styles.info}>
-                <h2 className={styles.title}>{movie.original_title}</h2>
+                <h2 className={styles.title}>{movieDetails.original_title}</h2>
 
                 <div className={styles.meta}>
                   {movie.release_date && (
@@ -118,20 +136,21 @@ export default function MovieModal({
                     </>
                   )}
 
-                  {movie.runtime > 0 && (
+                  {movieDetails.runtime > 0 && (
                     <>
                       <span className={styles.metaSep} aria-hidden="true" />
 
                       <span className={styles.metaYear}>
-                        {Math.floor(movie.runtime / 60)}h {movie.runtime % 60}m
+                        {Math.floor(movieDetails.runtime / 60)}h{" "}
+                        {movieDetails.runtime % 60}m
                       </span>
                     </>
                   )}
                 </div>
 
-                {movie.genres.length > 0 && (
+                {movieDetails.genres.length > 0 && (
                   <div className={styles.genres} aria-label="Genres">
-                    {movie.genres.map((genre) => (
+                    {movieDetails.genres.map((genre) => (
                       <span key={genre.id} className={styles.genreTag}>
                         {genre.name}
                       </span>
@@ -139,10 +158,10 @@ export default function MovieModal({
                   </div>
                 )}
 
-                {movie.overview && (
+                {movieDetails.overview && (
                   <div>
                     <p className={styles.overviewLabel}>Overview</p>
-                    <p className={styles.overview}>{movie.overview}</p>
+                    <p className={styles.overview}>{movieDetails.overview}</p>
                   </div>
                 )}
               </div>

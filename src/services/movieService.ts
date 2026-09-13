@@ -1,5 +1,12 @@
 import axios from "axios"
-import type { MovieDetails, MovieResponse } from "../types/movie"
+import type { Movie, MovieDetails } from "../types/types"
+
+export interface MovieResponse {
+  page: number
+  results: Movie[]
+  total_pages: number
+  total_results: number
+}
 
 const BASE_URL = import.meta.env.VITE_TMDB_API_URL
 

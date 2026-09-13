@@ -17,12 +17,5 @@ export interface MovieDetails {
   vote_average: number
 }
 
-export interface MovieResponse {
-  page: number
-  results: Movie[]
-  total_pages: number
-  total_results: number
-}
-
 export type AppState = "idle" | "loading" | "results" | "empty" | "error"
 export type ModalState = "loading" | "ready" | "error"

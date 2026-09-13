@@ -1,17 +1,12 @@
 import { useState } from "react"
 import styles from "./App.module.css"
 import SearchBar from "../SearchBar/SearchBar"
-import { fetchMovieDetails, fetchMovies } from "../../services/movieService"
-import {
-  type MovieDetails,
-  type AppState,
-  type Movie,
-  type ModalState,
-} from "../../types/movie"
+import { fetchMovies } from "../../services/movieService"
+import { type AppState, type Movie } from "../../types/types"
 import MovieGrid from "../MovieGrid/MovieGrid"
 import Loader from "../Loader/Loader"
 import Hero from "../Hero/Hero"
-import ErrorMessage from "../ErrorMessage/ErrorMessage"
+import ToasterMessage from "../ToasterMessage/ToasterMessage"
 import toast from "react-hot-toast"
 import EmptyState from "../EmptyState/EmptyState"
 import ErrorState from "../ErrorState/ErrorState"
@@ -25,8 +20,7 @@ function App() {
   const [query, setQuery] = useState("")
   const [errorMsg, setErrorMsg] = useState<string | undefined>()
 
-  const [modalState, setModalState] = useState<ModalState | null>(null)
-  const [selectedMovie, setSelectedMovie] = useState<MovieDetails | null>(null)
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
 
   const handleSubmit = async (query: string): Promise<void> => {
     setQuery(query)
@@ -58,28 +52,17 @@ function App() {
     handleSubmit(query)
   }
 
-  const onSelect = async (movieId: number): Promise<void> => {
-    setModalState("loading")
-    setSelectedMovie(null)
-
-    try {
-      const movie = await fetchMovieDetails(movieId)
-      setSelectedMovie(movie)
-      setModalState("ready")
-    } catch (error) {
-      console.error(error)
-      setModalState("error")
-    }
+  const onSelect = (movie: Movie): void => {
+    setSelectedMovie(movie)
   }
 
   const handleCloseModal = (): void => {
     setSelectedMovie(null)
-    setModalState(null)
   }
 
   return (
     <>
-      <ErrorMessage />
+      <ToasterMessage />
 
       <SearchBar onSubmit={handleSubmit} isLoading={appState === "loading"} />
       <main>
@@ -99,12 +82,8 @@ function App() {
         )}
       </main>
 
-      {modalState && (
-        <MovieModal
-          movie={selectedMovie}
-          onClose={handleCloseModal}
-          modalState={modalState}
-        />
+      {selectedMovie && (
+        <MovieModal movie={selectedMovie} onClose={handleCloseModal} />
       )}
     </>
   )

@@ -1,6 +1,6 @@
 import { Toaster } from "react-hot-toast"
 
-export default function ErrorMessage() {
+export default function ToasterMessage() {
   return (
     <Toaster
       position="top-right"

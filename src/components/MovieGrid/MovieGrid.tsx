@@ -1,8 +1,8 @@
-import type { Movie } from "../../types/movie"
+import type { Movie } from "../../types/types"
 import styles from "./MovieGrid.module.css"
 
 interface MovieGridProps {
-  onSelect: (movieId: number) => void
+  onSelect: (movie: Movie) => void
   movies: Movie[]
 }
 
@@ -11,7 +11,7 @@ export default function MovieGrid({ onSelect, movies }: MovieGridProps) {
     <ul className={styles.grid}>
       {movies.map((movie: Movie) => (
         <li className={styles.card} key={movie.id}>
-          <a onClick={() => onSelect(movie.id)} aria-label={movie.title}>
+          <a onClick={() => onSelect(movie)} aria-label={movie.title}>
             <div className={styles.posterWrapper}>
               {movie.poster_path ? (
                 <img

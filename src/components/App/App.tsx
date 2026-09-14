@@ -9,7 +9,7 @@ import Hero from "../Hero/Hero"
 import ToasterMessage from "../ToasterMessage/ToasterMessage"
 import toast from "react-hot-toast"
 import EmptyState from "../EmptyState/EmptyState"
-import ErrorState from "../ErrorState/ErrorState"
+import ErrorState from "../ErrorMessage/ErrorMessage"
 import MovieModal from "../MovieModal/MovieModal"
 
 function App() {

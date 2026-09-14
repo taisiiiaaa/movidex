@@ -1,4 +1,4 @@
-import styles from "./ErrorState.module.css"
+import styles from "./ErrorMessage.module.css"
 
 interface ErrorStateProps {
   message: string | undefined

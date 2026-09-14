@@ -2,7 +2,7 @@ import { useState } from "react"
 import styles from "./App.module.css"
 import SearchBar from "../SearchBar/SearchBar"
 import { fetchMovies } from "../../services/movieService"
-import { type AppState, type Movie } from "../../types/types"
+import type Movie from "../../types/movie"
 import MovieGrid from "../MovieGrid/MovieGrid"
 import Loader from "../Loader/Loader"
 import Hero from "../Hero/Hero"
@@ -11,6 +11,8 @@ import toast from "react-hot-toast"
 import EmptyState from "../EmptyState/EmptyState"
 import ErrorState from "../ErrorMessage/ErrorMessage"
 import MovieModal from "../MovieModal/MovieModal"
+
+type AppState = "idle" | "loading" | "results" | "empty" | "error"
 
 function App() {
   const [appState, setAppState] = useState<AppState>("idle")

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import { fetchMovieDetails } from "../../services/movieService"
-import type { Movie, MovieDetails, ModalState } from "../../types/types"
+import type Movie from "../../types/movie"
+import type MovieDetails from "../../types/movieDetails"
 import styles from "./MovieModal.module.css"
 import Loader from "../Loader/Loader"
 
@@ -9,6 +10,8 @@ interface MovieModalProps {
   movie: Movie
   onClose: () => void
 }
+
+type ModalState = "loading" | "ready" | "error"
 
 export default function MovieModal({ movie, onClose }: MovieModalProps) {
   const modalRoot = document.getElementById("modal-root")

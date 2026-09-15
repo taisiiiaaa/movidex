@@ -1,4 +1,4 @@
-import type Movie from "../../types/movie"
+import type { Movie } from "../../types/movie"
 import styles from "./MovieGrid.module.css"
 
 interface MovieGridProps {
@@ -16,7 +16,7 @@ export default function MovieGrid({ onSelect, movies }: MovieGridProps) {
               {movie.poster_path ? (
                 <img
                   className={styles.poster}
-                  src={`https://image.tmdb.org/t/p/w500/${movie.poster_path}`}
+                  src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
                   alt={`${movie.title} poster`}
                 />
               ) : (

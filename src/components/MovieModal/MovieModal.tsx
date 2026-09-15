@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import { fetchMovieDetails } from "../../services/movieService"
-import type Movie from "../../types/movie"
-import type MovieDetails from "../../types/movieDetails"
+import type { Movie } from "../../types/movie"
+import type { MovieDetails } from "../../types/movieDetails"
 import styles from "./MovieModal.module.css"
 import Loader from "../Loader/Loader"
 
@@ -62,17 +62,19 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
     }
   }, [onClose])
 
+  const handleCloseModal = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose()
+    }
+  }
+
   if (!modalRoot) {
     return null
   }
 
   return createPortal(
-    <div className={styles.backdrop} onClick={onClose}>
-      <div
-        onClick={(event) => event.stopPropagation()}
-        className={styles.dialog}
-        role="dialog"
-        aria-modal="true">
+    <div className={styles.backdrop} onClick={handleCloseModal}>
+      <div className={styles.dialog} role="dialog" aria-modal="true">
         <button
           type="button"
           className={styles.closeBtn}
@@ -102,9 +104,9 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
                 {movieDetails.backdrop_path ? (
                   <img
                     className={styles.poster}
-                    src={`https://image.tmdb.org/t/p/original/${movieDetails.backdrop_path}`}
+                    src={`https://image.tmdb.org/t/p/original${movieDetails.backdrop_path}`}
                     alt={`${movieDetails.original_title} poster`}
-                    draggable={false}
+                    draggable={true}
                   />
                 ) : (
                   <div className={styles.noPoster}>No poster available</div>

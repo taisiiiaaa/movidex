@@ -124,6 +124,7 @@
 }
 
 .searchBtn:disabled {
+  cursor: not-allowed;
   background-color: var(--color-border);
   color: var(--color-text-muted);
 }

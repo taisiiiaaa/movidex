@@ -11,7 +11,7 @@ import toast from "react-hot-toast"
 import EmptyState from "../EmptyState/EmptyState"
 import ErrorState from "../ErrorMessage/ErrorMessage"
 import MovieModal from "../MovieModal/MovieModal"
-import { useQuery } from "@tanstack/react-query"
+import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import Pagination from "@mui/material/Pagination"
 
 function App() {
@@ -19,11 +19,13 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
 
-  const { data, isLoading, error, isError, refetch } = useQuery({
-    queryKey: ["movies", searchQuery, currentPage],
-    queryFn: () => fetchMovies(searchQuery, currentPage),
-    enabled: Boolean(searchQuery),
-  })
+  const { data, isPending, isFetching, isSuccess, error, isError, refetch } =
+    useQuery({
+      queryKey: ["movies", searchQuery, currentPage],
+      queryFn: () => fetchMovies(searchQuery, currentPage),
+      enabled: Boolean(searchQuery),
+      placeholderData: keepPreviousData,
+    })
 
   useEffect(() => {
     if (data && data.results.length === 0) {
@@ -31,7 +33,7 @@ function App() {
     }
   }, [data])
 
-  const handleSubmit = async (query: string): Promise<void> => {
+  const handleSubmit = (query: string): void => {
     setSearchQuery(query)
   }
 
@@ -47,19 +49,18 @@ function App() {
     setSelectedMovie(null)
   }
 
-  const hasResults = data && data.results.length > 0
-  const isEmpty = data && data.results.length === 0
-
   return (
     <>
       <ToasterMessage />
 
-      <SearchBar onSubmit={handleSubmit} isLoading={isLoading} />
+      <SearchBar onSubmit={handleSubmit} isLoading={isFetching} />
       <main>
-        {!searchQuery && !isLoading && !isError && <Hero />}
-        {isLoading && <Loader />}
+        {!searchQuery && !isFetching && !isError && <Hero />}
+        {isPending && searchQuery && <Loader />}
 
-        {isEmpty && searchQuery && <EmptyState query={searchQuery} />}
+        {isSuccess && data.results.length === 0 && searchQuery && (
+          <EmptyState query={searchQuery} />
+        )}
         {isError && searchQuery && (
           <ErrorState
             message={
@@ -69,7 +70,7 @@ function App() {
           />
         )}
 
-        {hasResults && (
+        {isSuccess && data.results.length > 0 && (
           <section className={styles.content}>
             <h2 className={styles.resultsHeading}>
               Results for "{searchQuery}"
@@ -78,7 +79,7 @@ function App() {
           </section>
         )}
 
-        {!isEmpty && !isError && data && data.total_pages > 1 && (
+        {isSuccess && data.total_pages > 1 && (
           <Pagination
             count={data.total_pages}
             page={currentPage}

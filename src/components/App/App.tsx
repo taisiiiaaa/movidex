@@ -17,6 +17,7 @@ import Pagination from "@mui/material/Pagination"
 function App() {
   const [searchQuery, setSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
 
   const { data, isLoading, error, isError, refetch } = useQuery({
     queryKey: ["movies", searchQuery, currentPage],
@@ -29,8 +30,6 @@ function App() {
       toast.error("No movies were found for your request.")
     }
   }, [data])
-
-  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
 
   const handleSubmit = async (query: string): Promise<void> => {
     setSearchQuery(query)

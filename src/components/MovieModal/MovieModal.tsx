@@ -4,7 +4,7 @@ import { fetchMovieDetails } from "../../services/movieService"
 import type { Movie } from "../../types/movie"
 import styles from "./MovieModal.module.css"
 import Loader from "../Loader/Loader"
-import { useQuery } from "@tanstack/react-query"
+import { keepPreviousData, useQuery } from "@tanstack/react-query"
 
 interface MovieModalProps {
   movie: Movie
@@ -17,6 +17,7 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["movieDetails", movie.id],
     queryFn: () => fetchMovieDetails(movie.id),
+    placeholderData: keepPreviousData,
   })
 
   useEffect(() => {

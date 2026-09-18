@@ -35,6 +35,17 @@
   transform: scale(1.02);
 }
 
+.cardButton {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
 .posterWrapper {
   position: relative;
   aspect-ratio: 2 / 3;

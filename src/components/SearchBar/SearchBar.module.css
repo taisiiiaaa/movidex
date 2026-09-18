@@ -110,8 +110,8 @@
   align-items: center;
   gap: var(--space-2);
   transition:
-    background-color var(--transition-fast),
-    color var(--transition-fast) transform var(--transition-fast);
+    background-color var(--transition-normal),
+    transform var(--transition-fast);
 }
 
 .searchBtn:hover,
@@ -124,7 +124,7 @@
 }
 
 .searchBtn:disabled {
-  background-color: var(--color-text-secondary);
+  background-color: var(--color-border);
   color: var(--color-text-muted);
 }
 

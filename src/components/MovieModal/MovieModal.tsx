@@ -1,42 +1,23 @@
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { createPortal } from "react-dom"
 import { fetchMovieDetails } from "../../services/movieService"
 import type { Movie } from "../../types/movie"
-import type { MovieDetails } from "../../types/movieDetails"
 import styles from "./MovieModal.module.css"
 import Loader from "../Loader/Loader"
+import { useQuery } from "@tanstack/react-query"
 
 interface MovieModalProps {
   movie: Movie
   onClose: () => void
 }
 
-type ModalState = "loading" | "ready" | "error"
-
 export default function MovieModal({ movie, onClose }: MovieModalProps) {
   const modalRoot = document.getElementById("modal-root")
 
-  const [movieDetails, setMovieDetails] = useState<MovieDetails | null>(null)
-
-  const [modalState, setModalState] = useState<ModalState>("loading")
-
-  useEffect(() => {
-    const loadMovieDetails = async () => {
-      try {
-        setModalState("loading")
-
-        const details = await fetchMovieDetails(movie.id)
-
-        setMovieDetails(details)
-        setModalState("ready")
-      } catch (error) {
-        console.error(error)
-        setModalState("error")
-      }
-    }
-
-    loadMovieDetails()
-  }, [movie.id])
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["movieDetails", movie.id],
+    queryFn: () => fetchMovieDetails(movie.id),
+  })
 
   useEffect(() => {
     const originalOverflow = document.body.style.overflow
@@ -86,26 +67,26 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
         </button>
 
         <div className={styles.body}>
-          {modalState === "loading" && (
+          {isLoading && (
             <div className={styles.info}>
               <Loader />
             </div>
           )}
 
-          {modalState === "error" && (
+          {isError && (
             <div className={styles.info}>
               <p className={styles.overview}>Could not load full details.</p>
             </div>
           )}
 
-          {modalState === "ready" && movieDetails && (
+          {data && (
             <>
               <div className={styles.artwork}>
-                {movieDetails.backdrop_path ? (
+                {data.backdrop_path ? (
                   <img
                     className={styles.poster}
-                    src={`https://image.tmdb.org/t/p/original${movieDetails.backdrop_path}`}
-                    alt={`${movieDetails.original_title} poster`}
+                    src={`https://image.tmdb.org/t/p/original${data.backdrop_path}`}
+                    alt={`${data.original_title} poster`}
                     draggable={true}
                   />
                 ) : (
@@ -114,7 +95,7 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
               </div>
 
               <div className={styles.info}>
-                <h2 className={styles.title}>{movieDetails.original_title}</h2>
+                <h2 className={styles.title}>{data.original_title}</h2>
 
                 <div className={styles.meta}>
                   {movie.release_date && (
@@ -141,21 +122,20 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
                     </>
                   )}
 
-                  {movieDetails.runtime > 0 && (
+                  {data.runtime > 0 && (
                     <>
                       <span className={styles.metaSep} aria-hidden="true" />
 
                       <span className={styles.metaYear}>
-                        {Math.floor(movieDetails.runtime / 60)}h{" "}
-                        {movieDetails.runtime % 60}m
+                        {Math.floor(data.runtime / 60)}h {data.runtime % 60}m
                       </span>
                     </>
                   )}
                 </div>
 
-                {movieDetails.genres.length > 0 && (
+                {data.genres.length > 0 && (
                   <div className={styles.genres} aria-label="Genres">
-                    {movieDetails.genres.map((genre) => (
+                    {data.genres.map((genre: { id: number; name: string }) => (
                       <span key={genre.id} className={styles.genreTag}>
                         {genre.name}
                       </span>
@@ -163,10 +143,10 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
                   </div>
                 )}
 
-                {movieDetails.overview && (
+                {data.overview && (
                   <div>
                     <p className={styles.overviewLabel}>Overview</p>
-                    <p className={styles.overview}>{movieDetails.overview}</p>
+                    <p className={styles.overview}>{data.overview}</p>
                   </div>
                 )}
               </div>

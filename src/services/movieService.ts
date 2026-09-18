@@ -15,9 +15,12 @@ const SEARCH_MOVIES_URL = `${BASE_URL}/search/movie`
 const MOVIE_DETAILS_URL = `${BASE_URL}/movie`
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY
 
-export const fetchMovies = async (query: string): Promise<MovieResponse> => {
+export const fetchMovies = async (
+  query: string,
+  page: number,
+): Promise<MovieResponse> => {
   const { data } = await axios.get<MovieResponse>(SEARCH_MOVIES_URL, {
-    params: { query },
+    params: { query, page },
     headers: { Authorization: `Bearer ${API_KEY}` },
   })
 

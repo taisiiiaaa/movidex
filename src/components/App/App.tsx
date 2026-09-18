@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import styles from "./App.module.css"
 import SearchBar from "../SearchBar/SearchBar"
 import { fetchMovies } from "../../services/movieService"
@@ -11,47 +11,33 @@ import toast from "react-hot-toast"
 import EmptyState from "../EmptyState/EmptyState"
 import ErrorState from "../ErrorMessage/ErrorMessage"
 import MovieModal from "../MovieModal/MovieModal"
-
-type AppState = "idle" | "loading" | "results" | "empty" | "error"
+import { useQuery } from "@tanstack/react-query"
+import Pagination from "@mui/material/Pagination"
 
 function App() {
-  const [appState, setAppState] = useState<AppState>("idle")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
 
-  const [movies, setMovies] = useState<Movie[]>([])
+  const { data, isLoading, error, isError, refetch } = useQuery({
+    queryKey: ["movies", searchQuery, currentPage],
+    queryFn: () => fetchMovies(searchQuery, currentPage),
+    enabled: Boolean(searchQuery),
+  })
 
-  const [query, setQuery] = useState("")
-  const [errorMsg, setErrorMsg] = useState<string | undefined>()
+  useEffect(() => {
+    if (data && data.results.length === 0) {
+      toast.error("No movies were found for your request.")
+    }
+  }, [data])
 
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
 
   const handleSubmit = async (query: string): Promise<void> => {
-    setQuery(query)
-
-    try {
-      setAppState("loading")
-      const response = await fetchMovies(query)
-
-      if (response.results.length === 0) {
-        setMovies([])
-        toast.error("No movies found for your request.")
-        setAppState("empty")
-      } else {
-        setMovies(response.results)
-        console.log(movies)
-
-        setAppState("results")
-      }
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : "Unknown error"
-      setErrorMsg(
-        msg === "TMDB_KEY_MISSING" ? "API key not configured." : undefined,
-      )
-      setAppState("error")
-    }
+    setSearchQuery(query)
   }
 
   const handleRetry = () => {
-    handleSubmit(query)
+    refetch()
   }
 
   const onSelect = (movie: Movie): void => {
@@ -62,25 +48,69 @@ function App() {
     setSelectedMovie(null)
   }
 
+  const hasResults = data && data.results.length > 0
+  const isEmpty = data && data.results.length === 0
+
   return (
     <>
       <ToasterMessage />
 
-      <SearchBar onSubmit={handleSubmit} isLoading={appState === "loading"} />
+      <SearchBar onSubmit={handleSubmit} isLoading={isLoading} />
       <main>
-        {appState === "idle" && <Hero />}
-        {appState === "loading" && <Loader />}
+        {!searchQuery && !isLoading && !isError && <Hero />}
+        {isLoading && <Loader />}
 
-        {appState === "empty" && <EmptyState query={query} />}
-        {appState === "error" && (
-          <ErrorState message={errorMsg} onRetry={handleRetry} />
+        {isEmpty && searchQuery && <EmptyState query={searchQuery} />}
+        {isError && searchQuery && (
+          <ErrorState
+            message={
+              error instanceof Error ? error.message : "Something went wrong."
+            }
+            onRetry={handleRetry}
+          />
         )}
 
-        {appState === "results" && (
+        {hasResults && (
           <section className={styles.content}>
-            <h2 className={styles.resultsHeading}>Results for "{query}"</h2>
-            <MovieGrid movies={movies} onSelect={onSelect} />
+            <h2 className={styles.resultsHeading}>
+              Results for "{searchQuery}"
+            </h2>
+            <MovieGrid movies={data.results} onSelect={onSelect} />
           </section>
+        )}
+
+        {!isEmpty && !isError && data && data.total_pages > 1 && (
+          <Pagination
+            count={data.total_pages}
+            page={currentPage}
+            onChange={(_, page) => setCurrentPage(page)}
+            size="medium"
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              marginBlock: "var(--space-8)",
+              "& .MuiPaginationItem-root": {
+                color: "var(--color-text-secondary)",
+                borderRadius: "50%",
+                transition:
+                  "background-color var(--transition-fast), color var(--transition-fast)",
+              },
+              "& .MuiPaginationItem-root:hover, & .MuiPaginationItem-root:focus":
+                { backgroundColor: "rgba(128, 128, 128, 0.25)" },
+              "& .MuiPaginationItem-root.Mui-selected": {
+                color: "var(--color-text)",
+                backgroundColor: "var(--color-accent)",
+                transition:
+                  "background-color var(--transition-fast), color var(--transition-fast)",
+              },
+              "& .MuiPaginationItem-root.Mui-selected:hover, .MuiPaginationItem-root.Mui-selected:focus":
+                { backgroundColor: "var(--color-accent-hover)" },
+              "& .MuiPaginationItem-root.Mui-disabled": {
+                color: "var(--color-text-muted)",
+                opacity: 0.5,
+              },
+            }}
+          />
         )}
       </main>
 

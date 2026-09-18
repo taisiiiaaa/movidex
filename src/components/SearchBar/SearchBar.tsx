@@ -8,7 +8,7 @@ interface SearchBarProps {
 
 export default function SearchBar({ onSubmit, isLoading }: SearchBarProps) {
   const handleSubmit = (formData: FormData) => {
-    const searchInput = formData.get("query")
+    const searchInput = formData.get("query") as string
 
     if (!searchInput) {
       toast.error("Please enter your search query.")
